@@ -4,31 +4,71 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Seme–Uke Spectrum | CP 攻度坐标轴</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#f7f7f7;color:#242424;font-family:system-ui,-apple-system,'PingFang SC',sans-serif;padding:22px}main{max-width:1200px;margin:auto}h1{font-size:25px;margin:0 0 8px}.hint{color:#777;font-size:14px}.panel{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin:18px 0}input,button{font:inherit;border:1px solid #ccc;border-radius:8px;background:#fff;padding:10px}input[type=number]{width:90px}input[type=text]{width:160px}input[type=file]{max-width:230px;font-size:13px}button{cursor:pointer}button:hover{background:#eee}.board{overflow-x:auto;border:1px solid #ddd;background:white;border-radius:12px}.stage{position:relative;min-width:760px;width:100%;height:570px;overflow:hidden;background:#fff}.axis{position:absolute;bottom:85px;left:7%;width:86%;height:2px;background:#222}.axis:after{content:'';position:absolute;right:-1px;top:-6px;width:12px;height:12px;border-right:2px solid #222;border-top:2px solid #222;transform:rotate(45deg)}.tick{position:absolute;bottom:56px;transform:translateX(-50%);font-size:14px;color:#444;text-align:center}.tick:before{content:'';display:block;width:1px;height:12px;background:#333;margin:0 auto 5px}.connections{position:absolute;inset:0;pointer-events:none;width:100%;height:100%;overflow:visible}.character{position:absolute;width:104px;transform:translateX(-50%);text-align:center;cursor:grab;touch-action:none;user-select:none;z-index:2;display:flex;flex-direction:column;align-items:center;gap:3px}.character:active{cursor:grabbing}.character img{width:94px;height:94px;object-fit:contain;pointer-events:none}.character .name{font-size:13px;line-height:18px;max-width:100%;overflow-wrap:anywhere}.character .score{font-size:12px;color:#777}.character .delete{position:absolute;right:-1px;top:-8px;border:0;border-radius:50%;width:23px;height:23px;padding:0;background:#eee;box-shadow:0 1px 4px #ccc;line-height:23px}.character .delete:hover{background:#f4cccc}.character.text-only{justify-content:flex-end;min-height:52px}.character.text-only .name{padding:8px 4px;border:1px solid #ddd;border-radius:7px;background:#fafafa}footer{font-size:13px;color:#888;text-align:center;padding:14px}.notice{font-size:13px;color:#777}
+*{box-sizing:border-box}body{margin:0;background:#f7f7f7;color:#242424;font-family:system-ui,-apple-system,'PingFang SC',sans-serif;padding:22px}main{max-width:1200px;margin:auto}h1{font-size:25px;margin:0 0 8px}.hint{color:#777;font-size:14px}.panel{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin:18px 0}input,button{font:inherit;border:1px solid #ccc;border-radius:8px;background:#fff;padding:10px}input[type=number]{width:90px}input[type=text]{width:160px}input[type=file]{max-width:230px;font-size:13px}button{cursor:pointer}button:hover{background:#eee}.board{overflow-x:auto;border:1px solid #ddd;background:white;border-radius:12px}.stage{position:relative;min-width:760px;width:100%;height:570px;overflow:hidden;background:#fff}.axis{position:absolute;bottom:85px;left:7%;width:86%;height:2px;background:#222}.axis:after{content:'';position:absolute;right:-1px;top:-6px;width:12px;height:12px;border-right:2px solid #222;border-top:2px solid #222;transform:rotate(45deg)}.tick{position:absolute;bottom:56px;transform:translateX(-50%);font-size:14px;color:#444;text-align:center}.tick:before{content:'';display:block;width:1px;height:12px;background:#333;margin:0 auto 5px}.connections{position:absolute;inset:0;pointer-events:none;width:100%;height:100%;overflow:visible}.character{position:absolute;width:104px;transform:translateX(-50%);text-align:center;cursor:grab;touch-action:none;user-select:none;z-index:2;display:flex;flex-direction:column;align-items:center;gap:3px}.character:active{cursor:grabbing}.character img{width:94px;height:94px;object-fit:contain;pointer-events:none}.character .name{font-size:13px;line-height:18px;max-width:100%;overflow-wrap:anywhere}.character .score{font-size:12px;color:#777}.character .delete{position:absolute;right:-1px;top:-8px;border:0;border-radius:50%;width:23px;height:23px;padding:0;background:#eee;box-shadow:0 1px 4px #ccc;line-height:23px}.character .delete:hover{background:#f4cccc}.character.text-only{justify-content:flex-end;min-height:52px}.character.text-only .name{padding:8px 4px;border:1px solid #ddd;border-radius:7px;background:#fafafa}footer{font-size:13px;color:#888;text-align:center;padding:14px}.notice{font-size:13px;color:#777}.stage.vertical{min-width:320px}.stage.vertical .axis{left:23%;top:55px;bottom:65px;width:2px;height:auto}.stage.vertical .axis:after{right:-6px;top:auto;bottom:-1px;transform:rotate(135deg)}.stage.vertical .tick{left:calc(23% - 29px);bottom:auto;transform:translateY(-50%);min-width:28px;text-align:right}.stage.vertical .tick:before{position:absolute;right:-11px;top:50%;transform:translateY(-50%);width:12px;height:1px;margin:0}.stage.vertical .character{transform:translate(-50%,-50%)}
 </style>
 </head>
 <body><main>
-<h1>♡ Seme–Uke Spectrum</h1><div class="hint">从左到右攻度逐渐增加 · 拖动角色可调整数值 · 相近角色自动错层</div>
-<div class="panel"><input id="name" type="text" placeholder="角色名（可选）"><input id="score" type="number" min="0" max="1" step="0.01" value="0.50" aria-label="攻度"><input id="file" type="file" accept="image/*"><button id="add">＋ 添加角色</button><button id="export">导出 PNG</button><button id="clear">清空</button></div>
+<h1>♡ Seme–Uke Spectrum</h1><div class="hint">横向：从左到右攻度增加 · 纵向：从上到下攻度减小 · 拖动角色可调整数值</div>
+<div class="panel"><input id="name" type="text" placeholder="角色名（可选）"><input id="score" type="number" min="0" max="1" step="0.01" value="0.50" aria-label="攻度"><input id="file" type="file" accept="image/*"><button id="add">＋ 添加角色</button><button id="mode" type="button" aria-label="切换横向或纵向模式">↕ 切换纵向</button><button id="export">导出 PNG</button><button id="clear">清空</button></div>
 <div class="board"><div class="stage" id="stage"><svg id="connections" class="connections" aria-hidden="true"></svg><div class="axis"></div><div id="ticks"></div><div id="characters"></div></div></div>
 <footer>0 = 最受 · 0.5 = 中间 · 1 = 最攻</footer><div class="notice">数据保存在当前浏览器。建议使用压缩后的图片，避免浏览器存储空间不足。</div>
 </main>
 <script>
 (()=>{'use strict';
 const stage=document.getElementById('stage'),layer=document.getElementById('characters'),svg=document.getElementById('connections');
-const STORAGE='cp-scale-v3';let characters=[];try{characters=JSON.parse(localStorage.getItem(STORAGE)||'[]');if(!Array.isArray(characters))characters=[];}catch(e){characters=[];}
+const STORAGE='cp-scale-v3';let vertical=localStorage.getItem('cp-scale-mode')==='vertical';let characters=[];try{characters=JSON.parse(localStorage.getItem(STORAGE)||'[]');if(!Array.isArray(characters))characters=[];}catch(e){characters=[];}
 const clamp=n=>Math.max(0,Math.min(1,n)), xPct=s=>7+86*s;
 const W=104, GAP=14, STEP=142, BASE=570, AXIS_BOTTOM=85, FIRST_BOTTOM=116;
 function save(){try{localStorage.setItem(STORAGE,JSON.stringify(characters));}catch(e){alert('存储空间不足，图片可能无法自动保存。请尝试缩小图片。');}}
-function tickRender(){const holder=document.getElementById('ticks');holder.replaceChildren();for(let i=0;i<=10;i++){const t=document.createElement('div');t.className='tick';t.style.left=xPct(i/10)+'%';t.textContent=(i/10).toFixed(1);holder.append(t);}}
-function layout(width){const lanes=[];const ordered=[...characters].sort((a,b)=>a.score-b.score||String(a.id).localeCompare(String(b.id)));const items=[];for(const c of ordered){const x=width*xPct(c.score)/100;let lane=0;while(lane<lanes.length && x-lanes[lane]<W+GAP)lane++;lanes[lane]=x;items.push({c,x,lane});}const height=Math.max(BASE,260+Math.max(1,lanes.length)*STEP);return {items,height,width};}
-function render(){const width=stage.clientWidth;const plan=layout(width);stage.style.height=plan.height+'px';layer.replaceChildren();svg.setAttribute('viewBox',`0 0 ${width} ${plan.height}`);svg.replaceChildren();const ns='http://www.w3.org/2000/svg';
-for(const {c,x,lane} of plan.items){const bottom=FIRST_BOTTOM+lane*STEP;const top=plan.height-bottom-(c.image?130:62);const line=document.createElementNS(ns,'line');line.setAttribute('x1',x);line.setAttribute('x2',x);line.setAttribute('y1',Math.max(0,top+110));line.setAttribute('y2',plan.height-AXIS_BOTTOM-4);line.setAttribute('stroke','#c4c4c4');line.setAttribute('stroke-dasharray','3 5');line.setAttribute('stroke-width','1');svg.append(line);
-const el=document.createElement('div');el.className='character'+(c.image?'':' text-only');el.style.left=xPct(c.score)+'%';el.style.bottom=bottom+'px';
-if(c.image){const img=document.createElement('img');img.src=c.image;img.alt=c.name||'角色图片';el.append(img);}if(c.name){const n=document.createElement('div');n.className='name';n.textContent=c.name;el.append(n);}const value=document.createElement('div');value.className='score';value.textContent=Number(c.score).toFixed(2);el.append(value);
-const del=document.createElement('button');del.className='delete';del.textContent='×';del.title='删除角色';del.addEventListener('pointerdown',e=>e.stopPropagation());del.addEventListener('click',e=>{e.stopPropagation();characters=characters.filter(item=>item.id!==c.id);save();render();});el.append(del);layer.append(el);
-el.addEventListener('pointerdown',e=>{if(e.target===del)return;e.preventDefault();el.setPointerCapture(e.pointerId);const move=ev=>{const r=stage.getBoundingClientRect();c.score=Math.round(clamp(((ev.clientX-r.left)/r.width-.07)/.86)*100)/100;el.style.left=xPct(c.score)+'%';value.textContent=c.score.toFixed(2);};const stop=()=>{el.removeEventListener('pointermove',move);el.removeEventListener('pointerup',stop);el.removeEventListener('pointercancel',stop);save();render();};el.addEventListener('pointermove',move);el.addEventListener('pointerup',stop);el.addEventListener('pointercancel',stop);});
-}}
+
+function tickRender(){const holder=document.getElementById('ticks');holder.replaceChildren();for(let i=0;i<=10;i++){const t=document.createElement('div');t.className='tick';if(vertical){t.style.top=(55+(1-i/10)*(stage.clientHeight-120))+'px';}else{t.style.left=xPct(i/10)+'%';}t.textContent=(i/10).toFixed(1);holder.append(t);}}
+function layout(width){
+ if(vertical){
+  const height=Math.max(800,180+characters.length*105);
+  const top=55,bottom=height-65,axisX=width*.23;
+  const ordered=[...characters].sort((a,b)=>b.score-a.score||String(a.id).localeCompare(String(b.id)));
+  const lanes=[],items=[];
+  for(const c of ordered){
+   const y=top+(1-c.score)*(bottom-top);let lane=0;
+   while(lane<lanes.length && Math.abs(y-lanes[lane])<145)lane++;
+   lanes[lane]=y;
+   const maxLane=Math.max(0,Math.floor((width-axisX-70)/120)-1);
+   const x=Math.min(width-60,axisX+100+Math.min(lane,maxLane)*120);
+   items.push({c,x,y,lane});
+  }
+  return {items,height,width,axisX,top,bottom};
+ }
+ const lanes=[],ordered=[...characters].sort((a,b)=>a.score-b.score||String(a.id).localeCompare(String(b.id))),items=[];
+ for(const c of ordered){const x=width*xPct(c.score)/100;let lane=0;while(lane<lanes.length&&x-lanes[lane]<W+GAP)lane++;lanes[lane]=x;items.push({c,x,lane});}
+ return {items,height:Math.max(BASE,260+Math.max(1,lanes.length)*STEP),width};
+}
+function render(){
+ stage.classList.toggle('vertical',vertical);
+ document.getElementById('mode').textContent=vertical?'↔ 切换横向':'↕ 切换纵向';
+ const width=stage.clientWidth,plan=layout(width);stage.style.height=plan.height+'px';
+ tickRender();layer.replaceChildren();svg.setAttribute('viewBox',`0 0 ${width} ${plan.height}`);svg.replaceChildren();
+ const ns='http://www.w3.org/2000/svg';
+ for(const item of plan.items){
+  const {c,x,lane}=item;
+  const line=document.createElementNS(ns,'line');
+  if(vertical){line.setAttribute('x1',plan.axisX+4);line.setAttribute('x2',x-55);line.setAttribute('y1',item.y);line.setAttribute('y2',item.y);}
+  else{const bottom=FIRST_BOTTOM+lane*STEP;const top=plan.height-bottom-(c.image?130:62);line.setAttribute('x1',x);line.setAttribute('x2',x);line.setAttribute('y1',Math.max(0,top+110));line.setAttribute('y2',plan.height-AXIS_BOTTOM-4);}
+  line.setAttribute('stroke','#c4c4c4');line.setAttribute('stroke-dasharray','3 5');line.setAttribute('stroke-width','1');svg.append(line);
+  const el=document.createElement('div');el.className='character'+(c.image?'':' text-only');
+  if(vertical){el.style.left=x+'px';el.style.top=item.y+'px';}else{el.style.left=xPct(c.score)+'%';el.style.bottom=(FIRST_BOTTOM+lane*STEP)+'px';}
+  if(c.image){const img=document.createElement('img');img.src=c.image;img.alt=c.name||'角色图片';el.append(img);}
+  if(c.name){const n=document.createElement('div');n.className='name';n.textContent=c.name;el.append(n);}
+  const value=document.createElement('div');value.className='score';value.textContent=Number(c.score).toFixed(2);el.append(value);
+  const del=document.createElement('button');del.className='delete';del.textContent='×';del.title='删除角色';
+  del.addEventListener('pointerdown',e=>e.stopPropagation());del.addEventListener('click',e=>{e.stopPropagation();characters=characters.filter(item=>item.id!==c.id);save();render();});el.append(del);layer.append(el);
+  el.addEventListener('pointerdown',e=>{
+   if(e.target===del)return;e.preventDefault();el.setPointerCapture(e.pointerId);
+   const move=ev=>{const r=stage.getBoundingClientRect();c.score=Math.round(clamp(vertical?1-(ev.clientY-r.top-55)/(r.height-120):((ev.clientX-r.left)/r.width-.07)/.86)*100)/100;if(vertical){el.style.top=(55+(1-c.score)*(r.height-120))+'px';}else{el.style.left=xPct(c.score)+'%';}value.textContent=c.score.toFixed(2);};
+   const stop=()=>{el.removeEventListener('pointermove',move);el.removeEventListener('pointerup',stop);el.removeEventListener('pointercancel',stop);save();render();};
+   el.addEventListener('pointermove',move);el.addEventListener('pointerup',stop);el.addEventListener('pointercancel',stop);
+  });
+ }
+}
 function addCharacter(){const name=document.getElementById('name').value.trim(),scoreField=document.getElementById('score'),raw=scoreField.value,score=Number(raw),file=document.getElementById('file').files[0];if(!name&&!file){alert('请填写角色名或上传图片，至少选择一种。');return;}if(raw.trim()===''||!Number.isFinite(score)||score<0||score>1){alert('攻度必须是 0 到 1 之间的数字。');return;}const commit=image=>{characters.push({id:Date.now()+'-'+Math.random().toString(36).slice(2),name,score:Math.round(score*100)/100,image});save();render();document.getElementById('name').value='';document.getElementById('file').value='';};if(!file){commit('');return;}const reader=new FileReader();reader.onload=()=>commit(String(reader.result));reader.onerror=()=>alert('图片读取失败，请重试。');reader.readAsDataURL(file);}
 async function exportPNG(){
 const btn=document.getElementById('export');
@@ -47,8 +87,30 @@ if(ios){
 }
 btn.disabled=true;btn.textContent='正在生成 PNG…';
 try {
-const width=1200,plan=layout(width),height=plan.height,canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,width,height);const left=width*.07,right=width*.93,y=height-AXIS_BOTTOM;ctx.strokeStyle='#222';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(right,y);ctx.lineTo(right-12,y-8);ctx.moveTo(right,y);ctx.lineTo(right-12,y+8);ctx.stroke();ctx.textAlign='center';ctx.fillStyle='#333';ctx.font='16px sans-serif';for(let i=0;i<=10;i++){const x=left+(right-left)*i/10;ctx.beginPath();ctx.moveTo(x,y-7);ctx.lineTo(x,y+7);ctx.stroke();ctx.fillText((i/10).toFixed(1),x,y+30);}
-for(const {c,x,lane} of plan.items){const bottom=FIRST_BOTTOM+lane*STEP;const scoreY=height-bottom-7;ctx.strokeStyle='#ccc';ctx.lineWidth=1;ctx.setLineDash([3,5]);ctx.beginPath();ctx.moveTo(x,scoreY+5);ctx.lineTo(x,y-5);ctx.stroke();ctx.setLineDash([]);if(c.image){const img=new Image();img.src=c.image;try{await img.decode();const ratio=Math.min(94/img.naturalWidth,94/img.naturalHeight);const w=img.naturalWidth*ratio,h=img.naturalHeight*ratio;ctx.drawImage(img,x-w/2,scoreY-112+(94-h)/2,w,h);}catch(e){}}ctx.fillStyle='#222';if(c.name){ctx.font='13px sans-serif';ctx.fillText(c.name,x,scoreY-13,104);}ctx.fillStyle='#777';ctx.font='12px sans-serif';ctx.fillText(Number(c.score).toFixed(2),x,scoreY+5);}
+
+const width=vertical?760:1200,plan=layout(width),height=plan.height,canvas=document.createElement('canvas');
+canvas.width=width;canvas.height=height;
+const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,width,height);
+ctx.strokeStyle='#222';ctx.lineWidth=2;ctx.textAlign='center';ctx.font='16px sans-serif';
+if(vertical){
+ const ax=plan.axisX;ctx.beginPath();ctx.moveTo(ax,plan.top);ctx.lineTo(ax,plan.bottom);ctx.lineTo(ax-8,plan.bottom-12);ctx.moveTo(ax,plan.bottom);ctx.lineTo(ax+8,plan.bottom-12);ctx.stroke();
+ for(let i=0;i<=10;i++){const y=plan.top+(1-i/10)*(plan.bottom-plan.top);ctx.beginPath();ctx.moveTo(ax-7,y);ctx.lineTo(ax+7,y);ctx.stroke();ctx.fillStyle='#333';ctx.fillText((i/10).toFixed(1),ax-34,y+5);}
+}else{
+ const left=width*.07,right=width*.93,y=height-AXIS_BOTTOM;
+ ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(right,y);ctx.lineTo(right-12,y-8);ctx.moveTo(right,y);ctx.lineTo(right-12,y+8);ctx.stroke();
+ for(let i=0;i<=10;i++){const x=left+(right-left)*i/10;ctx.beginPath();ctx.moveTo(x,y-7);ctx.lineTo(x,y+7);ctx.stroke();ctx.fillStyle='#333';ctx.fillText((i/10).toFixed(1),x,y+30);}
+}
+for(const item of plan.items){
+ const {c,x,lane}=item;
+ let scoreY, imageTop;
+ ctx.strokeStyle='#ccc';ctx.lineWidth=1;ctx.setLineDash([3,5]);ctx.beginPath();
+ if(vertical){scoreY=item.y+53;imageTop=item.y-61;ctx.moveTo(plan.axisX+5,item.y);ctx.lineTo(x-54,item.y);}
+ else{const bottom=FIRST_BOTTOM+lane*STEP;scoreY=height-bottom-7;imageTop=scoreY-112;ctx.moveTo(x,scoreY+5);ctx.lineTo(x,height-AXIS_BOTTOM-5);}
+ ctx.stroke();ctx.setLineDash([]);
+ if(c.image){const img=new Image();img.src=c.image;try{await img.decode();const ratio=Math.min(94/img.naturalWidth,94/img.naturalHeight);const w=img.naturalWidth*ratio,h=img.naturalHeight*ratio;ctx.drawImage(img,x-w/2,imageTop+(94-h)/2,w,h);}catch(e){}}
+ ctx.fillStyle='#222';if(c.name){ctx.font='13px sans-serif';ctx.fillText(c.name,x,vertical?item.y+43:scoreY-13,104);}
+ ctx.fillStyle='#777';ctx.font='12px sans-serif';ctx.fillText(Number(c.score).toFixed(2),x,vertical?item.y+59:scoreY+5);
+}
 const blob=await new Promise((resolve,reject)=>{
  if(!canvas.toBlob){try{const data=canvas.toDataURL('image/png');fetch(data).then(r=>r.blob()).then(resolve,reject);}catch(e){reject(e);}return;}
  canvas.toBlob(b=>b?resolve(b):reject(new Error('无法生成 PNG 图片')),'image/png');
@@ -72,6 +134,6 @@ if(ios){
   btn.disabled=false;btn.textContent=originalText;
 }
 }
-document.getElementById('add').addEventListener('click',addCharacter);document.getElementById('export').addEventListener('click',exportPNG);document.getElementById('clear').addEventListener('click',()=>{if(confirm('确定清空所有角色吗？')){characters=[];save();render();}});window.addEventListener('resize',render);tickRender();render();
+document.getElementById('mode').addEventListener('click',()=>{vertical=!vertical;try{localStorage.setItem('cp-scale-mode',vertical?'vertical':'horizontal');}catch(e){}render();});document.getElementById('add').addEventListener('click',addCharacter);document.getElementById('export').addEventListener('click',exportPNG);document.getElementById('clear').addEventListener('click',()=>{if(confirm('确定清空所有角色吗？')){characters=[];save();render();}});window.addEventListener('resize',render);tickRender();render();
 })();
 </script></body></html>
