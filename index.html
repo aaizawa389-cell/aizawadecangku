@@ -30,9 +30,40 @@ const del=document.createElement('button');del.className='delete';del.textConten
 el.addEventListener('pointerdown',e=>{if(e.target===del)return;e.preventDefault();el.setPointerCapture(e.pointerId);const move=ev=>{const r=stage.getBoundingClientRect();c.score=Math.round(clamp(((ev.clientX-r.left)/r.width-.07)/.86)*100)/100;el.style.left=xPct(c.score)+'%';value.textContent=c.score.toFixed(2);};const stop=()=>{el.removeEventListener('pointermove',move);el.removeEventListener('pointerup',stop);el.removeEventListener('pointercancel',stop);save();render();};el.addEventListener('pointermove',move);el.addEventListener('pointerup',stop);el.addEventListener('pointercancel',stop);});
 }}
 function addCharacter(){const name=document.getElementById('name').value.trim(),scoreField=document.getElementById('score'),raw=scoreField.value,score=Number(raw),file=document.getElementById('file').files[0];if(!name&&!file){alert('请填写角色名或上传图片，至少选择一种。');return;}if(raw.trim()===''||!Number.isFinite(score)||score<0||score>1){alert('攻度必须是 0 到 1 之间的数字。');return;}const commit=image=>{characters.push({id:Date.now()+'-'+Math.random().toString(36).slice(2),name,score:Math.round(score*100)/100,image});save();render();document.getElementById('name').value='';document.getElementById('file').value='';};if(!file){commit('');return;}const reader=new FileReader();reader.onload=()=>commit(String(reader.result));reader.onerror=()=>alert('图片读取失败，请重试。');reader.readAsDataURL(file);}
-async function exportPNG(){const width=1200,plan=layout(width),height=plan.height,canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,width,height);const left=width*.07,right=width*.93,y=height-AXIS_BOTTOM;ctx.strokeStyle='#222';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(right,y);ctx.lineTo(right-12,y-8);ctx.moveTo(right,y);ctx.lineTo(right-12,y+8);ctx.stroke();ctx.textAlign='center';ctx.fillStyle='#333';ctx.font='16px sans-serif';for(let i=0;i<=10;i++){const x=left+(right-left)*i/10;ctx.beginPath();ctx.moveTo(x,y-7);ctx.lineTo(x,y+7);ctx.stroke();ctx.fillText((i/10).toFixed(1),x,y+30);}
+async function exportPNG(){
+const btn=document.getElementById('export');
+const originalText=btn.textContent;
+const safari=/Safari/i.test(navigator.userAgent)&&!/CriOS|FxiOS|EdgiOS|MicroMessenger/i.test(navigator.userAgent);
+const ios=/iPad|iPhone|iPod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+// Open the preview synchronously during the click, before any await.
+const preview=(safari&&ios)?window.open('','_blank'):null;
+if(preview){preview.document.title='正在生成图片';preview.document.body.textContent='正在生成图片，请稍候…';}
+btn.disabled=true;btn.textContent='正在生成 PNG…';
+try {
+const width=1200,plan=layout(width),height=plan.height,canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,width,height);const left=width*.07,right=width*.93,y=height-AXIS_BOTTOM;ctx.strokeStyle='#222';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(right,y);ctx.lineTo(right-12,y-8);ctx.moveTo(right,y);ctx.lineTo(right-12,y+8);ctx.stroke();ctx.textAlign='center';ctx.fillStyle='#333';ctx.font='16px sans-serif';for(let i=0;i<=10;i++){const x=left+(right-left)*i/10;ctx.beginPath();ctx.moveTo(x,y-7);ctx.lineTo(x,y+7);ctx.stroke();ctx.fillText((i/10).toFixed(1),x,y+30);}
 for(const {c,x,lane} of plan.items){const bottom=FIRST_BOTTOM+lane*STEP;const scoreY=height-bottom-7;ctx.strokeStyle='#ccc';ctx.lineWidth=1;ctx.setLineDash([3,5]);ctx.beginPath();ctx.moveTo(x,scoreY+5);ctx.lineTo(x,y-5);ctx.stroke();ctx.setLineDash([]);if(c.image){const img=new Image();img.src=c.image;try{await img.decode();const ratio=Math.min(94/img.naturalWidth,94/img.naturalHeight);const w=img.naturalWidth*ratio,h=img.naturalHeight*ratio;ctx.drawImage(img,x-w/2,scoreY-112+(94-h)/2,w,h);}catch(e){}}ctx.fillStyle='#222';if(c.name){ctx.font='13px sans-serif';ctx.fillText(c.name,x,scoreY-13,104);}ctx.fillStyle='#777';ctx.font='12px sans-serif';ctx.fillText(Number(c.score).toFixed(2),x,scoreY+5);}
-const link=document.createElement('a');link.download='CP攻度坐标轴.png';link.href=canvas.toDataURL('image/png');link.click();}
+const blob=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('无法生成 PNG 图片')),'image/png'));
+const url=URL.createObjectURL(blob);
+if(preview){
+  preview.location.replace(url);
+  // Keep the blob URL alive so Safari can display and save the image.
+}else{
+  const link=document.createElement('a');
+  link.download='CP攻度坐标轴.png';
+  link.href=url;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),60000);
+}
+}catch(err){
+  if(preview&&!preview.closed)preview.close();
+  console.error('PNG export failed:',err);
+  alert('图片导出失败：'+(err&&err.message?err.message:'请重试'));
+}finally{
+  btn.disabled=false;btn.textContent=originalText;
+}
+}
 document.getElementById('add').addEventListener('click',addCharacter);document.getElementById('export').addEventListener('click',exportPNG);document.getElementById('clear').addEventListener('click',()=>{if(confirm('确定清空所有角色吗？')){characters=[];save();render();}});window.addEventListener('resize',render);tickRender();render();
 })();
 </script></body></html>
