@@ -49,7 +49,31 @@ if(mode==='move')drag(el,pos=>{p.x=clamp(pos.x,65,W-65);p.y=clamp(pos.y,65,H-65)
 }
 }
 function point(ev){const r=$('board').getBoundingClientRect();return {x:(ev.clientX-r.left)*W/r.width,y:(ev.clientY-r.top)*H/r.height};}
-function drag(el,onMove,nodeDrag=false){let start=null,moved=false;el.addEventListener('pointerdown',ev=>{if(ev.button!==0)return;start=point(ev);moved=false;el.setPointerCapture(ev.pointerId);ev.preventDefault();});el.addEventListener('pointermove',ev=>{if(!start)return;const p=point(ev);if(Math.hypot(p.x-start.x,p.y-start.y)>4){if(!moved){snapshot();moved=true;}onMove(p);}});const end=()=>{if(!start)return;start=null;if(moved){dragging=nodeDrag;commit();}};el.addEventListener('pointerup',end);el.addEventListener('pointercancel',end);}
+function drag(el,onMove,nodeDrag=false){
+ let start=null,moved=false;
+ el.addEventListener('pointerdown',ev=>{
+  if(ev.button!==0)return;
+  start=point(ev);moved=false;ev.preventDefault();
+  const move=event=>{
+   if(!start)return;
+   const p=point(event);
+   if(Math.hypot(p.x-start.x,p.y-start.y)>4){
+    if(!moved){snapshot();moved=true;}
+    onMove(p);
+   }
+  };
+  const end=()=>{
+   window.removeEventListener('pointermove',move);
+   window.removeEventListener('pointerup',end);
+   window.removeEventListener('pointercancel',end);
+   if(moved){dragging=nodeDrag;commit();}
+   start=null;
+  };
+  window.addEventListener('pointermove',move);
+  window.addEventListener('pointerup',end);
+  window.addEventListener('pointercancel',end);
+ });
+}
 function add(){if(state.nodes.length>=9){alert('最多添加 9 位角色。');return;}snapshot();const i=state.nodes.length,a=-Math.PI/2+i*2*Math.PI/Math.max(3,i+1);const p={id:uid(),name:'角色 '+(i+1),x:500+260*Math.cos(a),y:360+230*Math.sin(a),image:''};state.nodes.push(p);selectedNode=p.id;selectedEdge=null;commit();}
 $('add').onclick=add;$('move').onclick=()=>{mode='move';pending=null;render();};$('connect').onclick=()=>{mode='connect';pending=null;render();};$('ring').onclick=()=>layout('ring');$('star').onclick=()=>layout('star');
 $('nodeName').oninput=()=>{const n=nodeBy(selectedNode);if(n){n.name=$('nodeName').value;persist();const el=[...$('nodes').children].find(x=>x.classList.contains('selected'));if(el){el.querySelector('.nm').textContent=n.name;if(!n.image)el.querySelector('.avatar').textContent=n.name.slice(0,1);}}};
