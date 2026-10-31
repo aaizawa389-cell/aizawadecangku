@@ -114,6 +114,8 @@ for(const item of plan.items){
  ctx.fillStyle='#222';if(c.name){ctx.font='13px sans-serif';ctx.fillText(c.name,x,vertical?item.y+43:scoreY-13,104);}
  ctx.fillStyle='#777';ctx.font='12px sans-serif';ctx.fillText(Number(c.score).toFixed(2),x,vertical?item.y+59:scoreY+5);
 }
+// Export-only attribution: subtle footer in the bottom-right corner.
+ctx.save();ctx.font='12px sans-serif';ctx.fillStyle='#999';ctx.textAlign='right';ctx.textBaseline='bottom';ctx.fillText('制表人：aizawa',width-18,height-14);ctx.restore();
 const blob=await new Promise((resolve,reject)=>{
  if(!canvas.toBlob){try{const data=canvas.toDataURL('image/png');fetch(data).then(r=>r.blob()).then(resolve,reject);}catch(e){reject(e);}return;}
  canvas.toBlob(b=>b?resolve(b):reject(new Error('无法生成 PNG 图片')),'image/png');
