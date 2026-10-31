@@ -24,7 +24,7 @@ function save(){try{localStorage.setItem(STORAGE,JSON.stringify(characters));}ca
 function tickRender(){const holder=document.getElementById('ticks');holder.replaceChildren();for(let i=0;i<=10;i++){const t=document.createElement('div');t.className='tick';if(vertical){t.style.top=(55+(1-i/10)*(stage.clientHeight-120))+'px';}else{t.style.left=xPct(i/10)+'%';}t.textContent=(i/10).toFixed(1);holder.append(t);}}
 function layout(width){
  if(vertical){
-  const height=Math.max(800,180+characters.length*105);
+  const height=characters.length<=3?500:500+(characters.length-3)*85;
   const top=55,bottom=height-65;let axisX=width*.23;
   const ordered=[...characters].sort((a,b)=>b.score-a.score||String(a.id).localeCompare(String(b.id)));
   const lanes=[],items=[];
