@@ -118,6 +118,14 @@ for(const item of plan.items){
 ctx.save();ctx.font='12px sans-serif';ctx.fillStyle='#999';ctx.textAlign='right';ctx.textBaseline='bottom';ctx.fillText('制表人：aizawa',width-18,height-14);ctx.restore();
 // Export-only subtle attribution, anchored to the bottom-right corner.
 ctx.save();ctx.font='12px sans-serif';ctx.fillStyle='rgba(70,70,70,0.58)';ctx.textAlign='right';ctx.textBaseline='bottom';ctx.fillText('制表人：aizawa',width-18,height-14);ctx.restore();
+// Small creator credit in the top-right corner of exported PNG only.
+ctx.save();
+ctx.fillStyle='rgba(75,75,75,0.62)';
+ctx.textAlign='right';
+ctx.textBaseline='top';
+ctx.font='12px sans-serif';
+ctx.fillText('制表人：aizawa',width-18,16);
+ctx.restore();
 const blob=await new Promise((resolve,reject)=>{
  if(!canvas.toBlob){try{const data=canvas.toDataURL('image/png');fetch(data).then(r=>r.blob()).then(resolve,reject);}catch(e){reject(e);}return;}
  canvas.toBlob(b=>b?resolve(b):reject(new Error('无法生成 PNG 图片')),'image/png');
