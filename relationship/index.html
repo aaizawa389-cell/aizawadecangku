@@ -3,7 +3,7 @@
 </style></head><body><main><h1>♡ Relationship Canvas</h1><div class="sub">多人 CP / CB 关系图 · 双向独立箭头 · 自由布局</div>
 <div class="bar"><button id="add">＋ 添加角色</button><button id="move" class="active">✋ 移动角色</button><button id="connect">↗ 手动连线</button><button id="fillEdges">补齐双向箭头</button><button id="ring">◯ 环形布局</button><button id="star">✳ 中心辐射</button><button id="undo">↶ 撤销</button><button id="redo">↷ 重做</button></div>
 <div class="bar"><button id="save">保存项目</button><button id="load">导入项目</button><input type="file" id="fileImport" accept=".json,application/json"><button id="png">导出 PNG</button><button id="reset">清空画布</button><span class="muted" id="status">自动保存在当前浏览器</span></div>
-<div id="edgePanel" class="panel hidden"><span class="pill" id="edgeTitle">箭头设置</span><label>线型 <select id="dash"><option value="solid">实线</option><option value="dash">虚线</option></select></label><label>弧度 <input id="curve" type="range" min="-220" max="220" step="5"></label><button id="reverse">反向复制</button><button id="deleteEdge">删除箭头</button><span class="muted">拖动图中的小圆点也可调整弧度</span></div>
+<div id="edgePanel" class="panel hidden"><span class="pill" id="edgeTitle">箭头设置</span><label>线型 <select id="dash"><option value="solid">实线</option><option value="dash">虚线</option></select></label><button id="reverse">反向复制</button><button id="deleteEdge">删除箭头</button></div>
 <div id="nodePanel" class="panel hidden"><span class="pill" id="nodeTitle"></span><label>名字 <input id="nodeName" type="text" maxlength="40"></label><label>照片 <input id="nodeImage" type="file" accept="image/*"></label><button id="deleteNode">删除角色</button></div>
 <div class="wrap" id="viewport"><div class="board" id="board"><svg class="edges" id="svg" viewBox="0 0 1000 720" preserveAspectRatio="none"></svg><div id="nodes"></div><div id="notes"></div><div id="handles"></div></div></div>
 <div class="help">3–5 人自动生成双向黑色箭头；第 6 人起新增角色不再自动连线，可使用手动连线。点击头像直接上传照片；点击角色名字可修改名称。点击箭头旁的文字填写感情，不需要的箭头可选中删除。</div><footer>制表人：aizawa · 本工具不会上传你的角色照片</footer></main><div id="preview" class="hidden"><button id="closePreview">关闭预览 ×</button><p>长按图片即可保存到照片（iPhone / iPad）</p><img id="previewImg" alt="导出的关系图"></div>
@@ -30,9 +30,7 @@ function addMissingPairs(){
 function layout(kind){snapshot();const ns=state.nodes,n=ns.length;if(!n)return;const H=canvasH(),cx=W/2,cy=H/2;if(kind==='star'){const central=selectedNode&&nodeBy(selectedNode)||ns[0];state.edges=state.edges.filter(e=>e.from===central.id||e.to===central.id);if(selectedEdge&&!state.edges.some(e=>e.id===selectedEdge))selectedEdge=null;central.x=cx;central.y=cy;const others=ns.filter(x=>x!==central);if(n===3){others[0].x=cx-320;others[0].y=cy;others[1].x=cx+320;others[1].y=cy;}else others.forEach((p,i)=>{const a=-Math.PI/2+2*Math.PI*i/others.length;p.x=cx+365*Math.cos(a);p.y=cy+(H/2-85)*Math.sin(a);});}else ns.forEach((p,i)=>{const a=-Math.PI/2+2*Math.PI*i/n;p.x=cx+385*Math.cos(a);p.y=cy+(H/2-85)*Math.sin(a);});commit();}
 function geom(e){const a=nodeBy(e.from),b=nodeBy(e.to);if(!a||!b)return null;const ax=a.x,ay=a.y-10,bx=b.x,by=b.y-10;const dx=bx-ax,dy=by-ay,len=Math.max(1,Math.hypot(dx,dy)),ux=dx/len,uy=dy/len,nx=-uy,ny=ux;
 const reverse=state.edges.find(t=>t.from===e.to&&t.to===e.from);
-let offset=e.curve??0;
-// Older saved projects used opposite signs for the two directions, which put both arcs on the same side.
-if(reverse&&offset*(reverse.curve??0)<0)offset=Math.abs(offset);
+const offset=0;
 // Anchor each arrow to the visible avatar circle, not the node's text/name box.
  // Give reciprocal arrows separate lanes and stop the tips just outside the rim.
  const side=reverse?14:0;
@@ -58,7 +56,7 @@ $('nodePanel').classList.toggle('hidden',!selectedNode);$('edgePanel').classList
 const n=nodeBy(selectedNode),e=edgeBy(selectedEdge);if(!n)selectedNode=null;if(!e)selectedEdge=null;
 $('nodePanel').classList.toggle('hidden',!n);$('edgePanel').classList.toggle('hidden',!e);
 if(n){$('nodeTitle').textContent='角色设置';if(document.activeElement!==$('nodeName'))$('nodeName').value=n.name;}
-if(e){$('edgeTitle').textContent=(nodeBy(e.from)?.name||'角色')+' → '+(nodeBy(e.to)?.name||'角色');$('dash').value=e.dash||'solid';$('curve').value=e.curve??0;}
+if(e){$('edgeTitle').textContent=(nodeBy(e.from)?.name||'角色')+' → '+(nodeBy(e.to)?.name||'角色');$('dash').value=e.dash||'solid';}
 const svg=$('svg');svg.replaceChildren();const nodes=$('nodes'),notes=$('notes'),handles=$('handles');nodes.replaceChildren();notes.replaceChildren();handles.replaceChildren();
 for(const edge of state.edges){const g=geom(edge);if(!g)continue;const d='M '+g.start.x+' '+g.start.y+' Q '+g.ctrl.x+' '+g.ctrl.y+' '+g.end.x+' '+g.end.y;
 const group=svgEl('g',{});const path=svgEl('path',{d,class:'path',stroke:'#222222','stroke-dasharray':edge.dash==='dash'?'7 6':'none'});group.append(path);
@@ -66,10 +64,10 @@ const size=12,aa=g.ang,tip=g.end;const arrow=svgEl('path',{d:'M '+(tip.x-size*Ma
 const hit=svgEl('path',{d,class:'hit'});hit.style.pointerEvents='stroke';hit.addEventListener('click',()=>{selectedEdge=edge.id;selectedNode=null;render();});group.append(hit);svg.append(group);
 const label=document.createElement('textarea');label.className='note'+(selectedEdge===edge.id?' selected':'');label.placeholder='写感情…';label.value=edge.text||'';label.rows=1;label.style.left=((g.label.x+(edge.tx||0))/W*100)+'%';label.style.top=((g.label.y+(edge.ty||0))/H*100)+'%';label.style.height=Math.max(26,Math.min(110,26+(String(edge.text||'').split('\n').length-1)*17))+'px';label.style.transform='translate(-50%,-50%) rotate('+g.textAngle+'rad)';
 label.addEventListener('focus',()=>{selectedEdge=edge.id;selectedNode=null;});label.addEventListener('input',()=>{edge.text=label.value;label.style.height='auto';label.style.height=Math.max(26,label.scrollHeight)+'px';persist();});notes.append(label);
-if(selectedEdge===edge.id){const h=document.createElement('div');h.className='handle';h.style.left=(g.ctrl.x/W*100)+'%';h.style.top=(g.ctrl.y/H*100)+'%';handles.append(h);drag(h,(p)=>{const gg=geom(edge);if(!gg)return;edge.curve=clamp(Math.round(((p.x-(gg.start.x+gg.end.x)/2)*gg.nx+(p.y-(gg.start.y+gg.end.y)/2)*gg.ny)/2),-220,220);render();});}
+
 }
 for(const p of state.nodes){const el=document.createElement('div');el.className='node'+(selectedNode===p.id?' selected':'');el.style.left=(p.x/W*100)+'%';el.style.top=(p.y/H*100)+'%';const av=document.createElement('div');av.className='avatar';if(p.image){const img=document.createElement('img');img.src=p.image;av.append(img);}else av.textContent=(p.name||'?').slice(0,1);av.title='轻点头像上传或更换照片';const name=document.createElement('div');name.className='nm';name.textContent=p.name;el.append(av,name);nodes.append(el);
-el.addEventListener('click',ev=>{ev.stopPropagation();if(dragging){dragging=false;return;}if(mode==='connect'){if(!pending){pending=p.id;render();}else if(pending!==p.id){const from=pending;pending=null;if(!state.edges.some(e=>e.from===from&&e.to===p.id)){snapshot();const reverse=state.edges.find(e=>e.from===p.id&&e.to===from);const edge={id:uid(),from,to:p.id,text:'',color:'#222222',curve:reverse?Math.abs(reverse.curve??0):0,dash:'solid'};state.edges.push(edge);selectedEdge=edge.id;selectedNode=null;commit();}else render();}}else{selectedNode=p.id;selectedEdge=null;render();}});
+el.addEventListener('click',ev=>{ev.stopPropagation();if(dragging){dragging=false;return;}if(mode==='connect'){if(!pending){pending=p.id;render();}else if(pending!==p.id){const from=pending;pending=null;if(!state.edges.some(e=>e.from===from&&e.to===p.id)){snapshot();const reverse=state.edges.find(e=>e.from===p.id&&e.to===from);const edge={id:uid(),from,to:p.id,text:'',color:'#222222',curve:0,dash:'solid'};state.edges.push(edge);selectedEdge=edge.id;selectedNode=null;commit();}else render();}}else{selectedNode=p.id;selectedEdge=null;render();}});
 if(mode==='move')drag(el,pos=>{p.x=clamp(pos.x,65,W-65);p.y=clamp(pos.y,65,H-65);el.style.left=(p.x/W*100)+'%';el.style.top=(p.y/H*100)+'%';render();},true,()=>{selectedNode=p.id;selectedEdge=null;render();$('nodeImage').click();});
 }
 }
@@ -107,9 +105,9 @@ $('nodeImage').onchange=ev=>{const file=ev.target.files[0],n=nodeBy(selectedNode
 $('deleteNode').onclick=()=>{if(!nodeBy(selectedNode))return;snapshot();const oldH=canvasH();state.nodes=state.nodes.filter(n=>n.id!==selectedNode);state.edges=state.edges.filter(e=>e.from!==selectedNode&&e.to!==selectedNode);const newH=canvasH();if(newH<oldH){for(const n of state.nodes)n.y=clamp(n.y*newH/oldH,65,newH-65);}selectedNode=null;commit();};
 
 $('dash').onchange=()=>{const e=edgeBy(selectedEdge);if(e){snapshot();e.dash=$('dash').value;commit();}};
-$('curve').oninput=()=>{const e=edgeBy(selectedEdge);if(e){e.curve=Number($('curve').value);persist();render();}};$('curve').onpointerdown=()=>snapshot();
+
 $('deleteEdge').onclick=()=>{snapshot();state.edges=state.edges.filter(e=>e.id!==selectedEdge);selectedEdge=null;commit();};
-$('reverse').onclick=()=>{const e=edgeBy(selectedEdge);if(!e)return;if(state.edges.some(x=>x.from===e.to&&x.to===e.from)){alert('反向箭头已经存在。');return;}snapshot();const rev={...e,id:uid(),from:e.to,to:e.from,text:'',curve:Math.abs(e.curve??0)};state.edges.push(rev);selectedEdge=rev.id;commit();};
+$('reverse').onclick=()=>{const e=edgeBy(selectedEdge);if(!e)return;if(state.edges.some(x=>x.from===e.to&&x.to===e.from)){alert('反向箭头已经存在。');return;}snapshot();const rev={...e,id:uid(),from:e.to,to:e.from,text:'',curve:0};state.edges.push(rev);selectedEdge=rev.id;commit();};
 $('undo').onclick=()=>{if(!history.length)return;future.push(JSON.stringify(state));state=JSON.parse(history.pop());selectedEdge=null;selectedNode=null;commit();};
 $('redo').onclick=()=>{if(!future.length)return;history.push(JSON.stringify(state));state=JSON.parse(future.pop());selectedEdge=null;selectedNode=null;commit();};
 function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);}
