@@ -25,17 +25,20 @@ function tickRender(){const holder=document.getElementById('ticks');holder.repla
 function layout(width){
  if(vertical){
   const height=Math.max(800,180+characters.length*105);
-  const top=55,bottom=height-65,axisX=width*.23;
+  const top=55,bottom=height-65;let axisX=width*.23;
   const ordered=[...characters].sort((a,b)=>b.score-a.score||String(a.id).localeCompare(String(b.id)));
   const lanes=[],items=[];
   for(const c of ordered){
    const y=top+(1-c.score)*(bottom-top);let lane=0;
    while(lane<lanes.length && Math.abs(y-lanes[lane])<145)lane++;
    lanes[lane]=y;
-   const maxLane=Math.max(0,Math.floor((width-axisX-70)/120)-1);
-   const x=Math.min(width-60,axisX+100+Math.min(lane,maxLane)*120);
-   items.push({c,x,y,lane});
+   items.push({c,y,lane});
   }
+  // Never clamp lanes to the same x: widen the canvas instead, allowing horizontal scrolling.
+  const neededWidth=320+Math.max(0,lanes.length-1)*120;
+  width=Math.max(width,neededWidth);
+  axisX=Math.max(100,Math.min(175,width*.23));
+  for(const item of items)item.x=axisX+100+item.lane*120;
   return {items,height,width,axisX,top,bottom};
  }
  const lanes=[],ordered=[...characters].sort((a,b)=>a.score-b.score||String(a.id).localeCompare(String(b.id))),items=[];
@@ -45,7 +48,7 @@ function layout(width){
 function render(){
  stage.classList.toggle('vertical',vertical);
  document.getElementById('mode').textContent=vertical?'↔ 切换横向':'↕ 切换纵向';
- const width=stage.clientWidth,plan=layout(width);stage.style.height=plan.height+'px';
+ stage.style.width=vertical?'760px':'100%';const width=vertical?Math.max(760,stage.parentElement.clientWidth):stage.clientWidth,plan=layout(width);stage.style.width=vertical?plan.width+'px':'100%';stage.style.height=plan.height+'px';
  tickRender();layer.replaceChildren();svg.setAttribute('viewBox',`0 0 ${width} ${plan.height}`);svg.replaceChildren();
  const ns='http://www.w3.org/2000/svg';
  for(const item of plan.items){
@@ -88,7 +91,7 @@ if(ios){
 btn.disabled=true;btn.textContent='正在生成 PNG…';
 try {
 
-const width=vertical?760:1200,plan=layout(width),height=plan.height,canvas=document.createElement('canvas');
+const plan=layout(vertical?760:1200),width=plan.width,height=plan.height,canvas=document.createElement('canvas');
 canvas.width=width;canvas.height=height;
 const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,width,height);
 ctx.strokeStyle='#222';ctx.lineWidth=2;ctx.textAlign='center';ctx.font='16px sans-serif';
