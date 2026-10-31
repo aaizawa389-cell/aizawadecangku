@@ -104,7 +104,7 @@ $('add').onclick=add;$('fillEdges').onclick=()=>{const missing=state.nodes.lengt
 $('nodeName').oninput=()=>{const n=nodeBy(selectedNode);if(n){n.name=$('nodeName').value;persist();const el=[...$('nodes').children].find(x=>x.classList.contains('selected'));if(el){el.querySelector('.nm').textContent=n.name;if(!n.image)el.querySelector('.avatar').textContent=n.name.slice(0,1);}}};
 $('nodeName').onfocus=()=>snapshot();
 $('nodeImage').onchange=ev=>{const file=ev.target.files[0],n=nodeBy(selectedNode);if(!file||!n)return;const reader=new FileReader();reader.onload=()=>{snapshot();n.image=String(reader.result);commit();};reader.readAsDataURL(file);ev.target.value='';};
-$('deleteNode').onclick=()=>{if(!nodeBy(selectedNode))return;snapshot();state.nodes=state.nodes.filter(n=>n.id!==selectedNode);state.edges=state.edges.filter(e=>e.from!==selectedNode&&e.to!==selectedNode);selectedNode=null;commit();};
+$('deleteNode').onclick=()=>{if(!nodeBy(selectedNode))return;snapshot();const oldH=canvasH();state.nodes=state.nodes.filter(n=>n.id!==selectedNode);state.edges=state.edges.filter(e=>e.from!==selectedNode&&e.to!==selectedNode);const newH=canvasH();if(newH<oldH){for(const n of state.nodes)n.y=clamp(n.y*newH/oldH,65,newH-65);}selectedNode=null;commit();};
 
 $('dash').onchange=()=>{const e=edgeBy(selectedEdge);if(e){snapshot();e.dash=$('dash').value;commit();}};
 $('curve').oninput=()=>{const e=edgeBy(selectedEdge);if(e){e.curve=Number($('curve').value);persist();render();}};$('curve').onpointerdown=()=>snapshot();
