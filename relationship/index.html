@@ -11,7 +11,7 @@
 (()=>{'use strict';
 const $=id=>document.getElementById(id),W=1000,BASE_H=720,KEY='relationship-canvas-v1',palette=['#222222'];
 let state={nodes:[],edges:[]},mode='move',pending=null,selectedNode=null,selectedEdge=null,history=[],future=[],dragging=false;
-const canvasH=()=>BASE_H+Math.max(0,state.nodes.length-5)*180;
+const canvasH=()=>BASE_H+Math.max(0,state.nodes.length-3)*180;
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7),clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 try{const saved=JSON.parse(localStorage.getItem(KEY));if(saved&&Array.isArray(saved.nodes)&&Array.isArray(saved.edges))state=saved;}catch(e){}
 function persist(){try{localStorage.setItem(KEY,JSON.stringify(state));$('status').textContent='已自动保存';}catch(e){$('status').textContent='浏览器存储不足，请导出项目备份';}}
