@@ -9,14 +9,14 @@
 </head>
 <body><main>
 <h1>♡ Seme–Uke Spectrum</h1><div class="hint">横向：从左到右攻度增加 · 纵向：从上到下攻度减小 · 拖动角色可调整数值</div>
-<div class="panel"><input id="name" type="text" placeholder="角色名（可选）"><input id="score" type="number" min="0" max="1" step="0.01" value="0.50" aria-label="攻度"><input id="file" type="file" accept="image/*"><button id="add">＋ 添加角色</button><button id="mode" type="button" aria-label="切换横向或纵向模式">↕ 切换纵向</button><button id="export">导出 PNG</button><button id="clear">清空</button></div>
+<div class="panel"><input id="name" type="text" placeholder="角色名（可选）"><input id="score" type="number" min="0" max="1" step="0.01" value="0.50" aria-label="攻度"><input id="file" type="file" accept="image/*"><button id="add">＋ 添加角色</button><button id="mode" type="button" aria-label="切换横向或纵向模式">↕ 切换纵向</button><button id="guides" type="button" aria-pressed="false">显示辅助线</button><button id="export">导出 PNG</button><button id="clear">清空</button></div>
 <div class="board"><div class="stage" id="stage"><svg id="connections" class="connections" aria-hidden="true"></svg><div class="axis"></div><div id="ticks"></div><div id="characters"></div></div></div>
 <footer>0 = 最受 · 0.5 = 中间 · 1 = 最攻</footer><div class="notice">数据保存在当前浏览器。建议使用压缩后的图片，避免浏览器存储空间不足。</div>
 </main>
 <script>
 (()=>{'use strict';
 const stage=document.getElementById('stage'),layer=document.getElementById('characters'),svg=document.getElementById('connections');
-const STORAGE='cp-scale-v3';let vertical=localStorage.getItem('cp-scale-mode')==='vertical';let characters=[];try{characters=JSON.parse(localStorage.getItem(STORAGE)||'[]');if(!Array.isArray(characters))characters=[];}catch(e){characters=[];}
+const STORAGE='cp-scale-v3';let vertical=localStorage.getItem('cp-scale-mode')==='vertical';let guideSettings={horizontal:localStorage.getItem('cp-guides-horizontal')==='true',vertical:localStorage.getItem('cp-guides-vertical')!=='false'};const showGuides=()=>guideSettings[vertical?'vertical':'horizontal'];let characters=[];try{characters=JSON.parse(localStorage.getItem(STORAGE)||'[]');if(!Array.isArray(characters))characters=[];}catch(e){characters=[];}
 const clamp=n=>Math.max(0,Math.min(1,n)), xPct=s=>7+86*s;
 const W=104, GAP=14, STEP=142, BASE=570, AXIS_BOTTOM=85, FIRST_BOTTOM=116;
 function save(){try{localStorage.setItem(STORAGE,JSON.stringify(characters));}catch(e){alert('存储空间不足，图片可能无法自动保存。请尝试缩小图片。');}}
@@ -47,7 +47,7 @@ function layout(width){
 }
 function render(){
  stage.classList.toggle('vertical',vertical);
- document.getElementById('mode').textContent=vertical?'↔ 切换横向':'↕ 切换纵向';
+ document.getElementById('mode').textContent=vertical?'↔ 切换横向':'↕ 切换纵向';const guidesButton=document.getElementById('guides');guidesButton.textContent=showGuides()?'隐藏辅助线':'显示辅助线';guidesButton.setAttribute('aria-pressed',String(showGuides()));
  stage.style.width=vertical?'760px':'100%';const width=vertical?Math.max(760,stage.parentElement.clientWidth):stage.clientWidth,plan=layout(width);stage.style.width=vertical?plan.width+'px':'100%';stage.style.height=plan.height+'px';
  tickRender();layer.replaceChildren();svg.setAttribute('viewBox',`0 0 ${width} ${plan.height}`);svg.replaceChildren();
  const ns='http://www.w3.org/2000/svg';
@@ -56,7 +56,7 @@ function render(){
   const line=document.createElementNS(ns,'line');
   if(vertical){line.setAttribute('x1',plan.axisX+4);line.setAttribute('x2',x-55);line.setAttribute('y1',item.y);line.setAttribute('y2',item.y);}
   else{const bottom=FIRST_BOTTOM+lane*STEP;const top=plan.height-bottom-(c.image?130:62);line.setAttribute('x1',x);line.setAttribute('x2',x);line.setAttribute('y1',Math.max(0,top+110));line.setAttribute('y2',plan.height-AXIS_BOTTOM-4);}
-  line.setAttribute('stroke','#c4c4c4');line.setAttribute('stroke-dasharray','3 5');line.setAttribute('stroke-width','1');svg.append(line);
+  line.setAttribute('stroke','#c4c4c4');line.setAttribute('stroke-dasharray','3 5');line.setAttribute('stroke-width','1');if(showGuides())svg.append(line);
   const el=document.createElement('div');el.className='character'+(c.image?'':' text-only');
   if(vertical){el.style.left=x+'px';el.style.top=item.y+'px';}else{el.style.left=xPct(c.score)+'%';el.style.bottom=(FIRST_BOTTOM+lane*STEP)+'px';}
   if(c.image){const img=document.createElement('img');img.src=c.image;img.alt=c.name||'角色图片';el.append(img);}
@@ -109,7 +109,7 @@ for(const item of plan.items){
  ctx.strokeStyle='#ccc';ctx.lineWidth=1;ctx.setLineDash([3,5]);ctx.beginPath();
  if(vertical){scoreY=item.y+53;imageTop=item.y-61;ctx.moveTo(plan.axisX+5,item.y);ctx.lineTo(x-54,item.y);}
  else{const bottom=FIRST_BOTTOM+lane*STEP;scoreY=height-bottom-7;imageTop=scoreY-112;ctx.moveTo(x,scoreY+5);ctx.lineTo(x,height-AXIS_BOTTOM-5);}
- ctx.stroke();ctx.setLineDash([]);
+ if(showGuides())ctx.stroke();ctx.setLineDash([]);
  if(c.image){const img=new Image();img.src=c.image;try{await img.decode();const ratio=Math.min(94/img.naturalWidth,94/img.naturalHeight);const w=img.naturalWidth*ratio,h=img.naturalHeight*ratio;ctx.drawImage(img,x-w/2,imageTop+(94-h)/2,w,h);}catch(e){}}
  ctx.fillStyle='#222';if(c.name){ctx.font='13px sans-serif';ctx.fillText(c.name,x,vertical?item.y+43:scoreY-13,104);}
  ctx.fillStyle='#777';ctx.font='12px sans-serif';ctx.fillText(Number(c.score).toFixed(2),x,vertical?item.y+59:scoreY+5);
@@ -137,6 +137,6 @@ if(ios){
   btn.disabled=false;btn.textContent=originalText;
 }
 }
-document.getElementById('mode').addEventListener('click',()=>{vertical=!vertical;try{localStorage.setItem('cp-scale-mode',vertical?'vertical':'horizontal');}catch(e){}render();});document.getElementById('add').addEventListener('click',addCharacter);document.getElementById('export').addEventListener('click',exportPNG);document.getElementById('clear').addEventListener('click',()=>{if(confirm('确定清空所有角色吗？')){characters=[];save();render();}});window.addEventListener('resize',render);tickRender();render();
+document.getElementById('guides').addEventListener('click',()=>{const key=vertical?'vertical':'horizontal';guideSettings[key]=!guideSettings[key];try{localStorage.setItem('cp-guides-'+key,String(guideSettings[key]));}catch(e){}render();});document.getElementById('mode').addEventListener('click',()=>{vertical=!vertical;try{localStorage.setItem('cp-scale-mode',vertical?'vertical':'horizontal');}catch(e){}render();});document.getElementById('add').addEventListener('click',addCharacter);document.getElementById('export').addEventListener('click',exportPNG);document.getElementById('clear').addEventListener('click',()=>{if(confirm('确定清空所有角色吗？')){characters=[];save();render();}});window.addEventListener('resize',render);tickRender();render();
 })();
 </script></body></html>
