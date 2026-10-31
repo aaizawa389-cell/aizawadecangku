@@ -70,10 +70,10 @@ if(mode==='move')drag(el,pos=>{p.x=clamp(pos.x,65,W-65);p.y=clamp(pos.y,65,H-65)
 }
 function point(ev){const H=canvasH();const r=$('board').getBoundingClientRect();return {x:(ev.clientX-r.left)*W/r.width,y:(ev.clientY-r.top)*H/r.height};}
 function drag(el,onMove,nodeDrag=false,onTap=null){
- let start=null,moved=false;
+ let start=null,moved=false,tapAvatar=false;
  el.addEventListener('pointerdown',ev=>{
   if(ev.button!==0)return;
-  start=point(ev);moved=false;ev.preventDefault();
+  start=point(ev);moved=false;tapAvatar=!!ev.target.closest('.avatar');ev.preventDefault();
   const move=event=>{
    if(!start)return;
    const p=point(event);
@@ -86,7 +86,7 @@ function drag(el,onMove,nodeDrag=false,onTap=null){
    window.removeEventListener('pointermove',move);
    window.removeEventListener('pointerup',end);
    window.removeEventListener('pointercancel',end);
-   if(moved){dragging=nodeDrag;commit();}else if(onTap){onTap();}
+   if(moved){dragging=nodeDrag;commit();}else if(onTap&&tapAvatar){onTap();}
    start=null;
   };
   window.addEventListener('pointermove',move);
