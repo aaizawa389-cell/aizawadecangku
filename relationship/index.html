@@ -11,7 +11,7 @@
 (()=>{'use strict';
 const $=id=>document.getElementById(id),W=1000,BASE_H=720,KEY='relationship-canvas-v1',palette=['#222222'];
 let state={nodes:[],edges:[]},mode='move',pending=null,selectedNode=null,selectedEdge=null,history=[],future=[],dragging=false;
-const canvasH=()=>BASE_H+Math.max(0,state.nodes.length-3)*180;
+const canvasH=()=>BASE_H+Math.max(0,state.nodes.length-3)*260;
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7),clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 try{const saved=JSON.parse(localStorage.getItem(KEY));if(saved&&Array.isArray(saved.nodes)&&Array.isArray(saved.edges))state=saved;}catch(e){}
 function persist(){try{localStorage.setItem(KEY,JSON.stringify(state));$('status').textContent='已自动保存';}catch(e){$('status').textContent='浏览器存储不足，请导出项目备份';}}
@@ -27,7 +27,7 @@ function addMissingPairs(){
  }
  return count;
 }
-function layout(kind){snapshot();const ns=state.nodes,n=ns.length;if(!n)return;const H=canvasH(),cx=W/2,cy=H/2;if(kind==='star'){const central=selectedNode&&nodeBy(selectedNode)||ns[0];central.x=cx;central.y=cy;const others=ns.filter(x=>x!==central);if(n===3){others[0].x=cx-320;others[0].y=cy;others[1].x=cx+320;others[1].y=cy;}else others.forEach((p,i)=>{const a=-Math.PI/2+2*Math.PI*i/others.length;p.x=cx+310*Math.cos(a);p.y=cy+(H/2-110)*Math.sin(a);});}else ns.forEach((p,i)=>{const a=-Math.PI/2+2*Math.PI*i/n;p.x=cx+330*Math.cos(a);p.y=cy+(H/2-110)*Math.sin(a);});commit();}
+function layout(kind){snapshot();const ns=state.nodes,n=ns.length;if(!n)return;const H=canvasH(),cx=W/2,cy=H/2;if(kind==='star'){const central=selectedNode&&nodeBy(selectedNode)||ns[0];central.x=cx;central.y=cy;const others=ns.filter(x=>x!==central);if(n===3){others[0].x=cx-320;others[0].y=cy;others[1].x=cx+320;others[1].y=cy;}else others.forEach((p,i)=>{const a=-Math.PI/2+2*Math.PI*i/others.length;p.x=cx+365*Math.cos(a);p.y=cy+(H/2-85)*Math.sin(a);});}else ns.forEach((p,i)=>{const a=-Math.PI/2+2*Math.PI*i/n;p.x=cx+385*Math.cos(a);p.y=cy+(H/2-85)*Math.sin(a);});commit();}
 function geom(e){const a=nodeBy(e.from),b=nodeBy(e.to);if(!a||!b)return null;const ax=a.x,ay=a.y-10,bx=b.x,by=b.y-10;const dx=bx-ax,dy=by-ay,len=Math.max(1,Math.hypot(dx,dy)),ux=dx/len,uy=dy/len,nx=-uy,ny=ux;
 const reverse=state.edges.find(t=>t.from===e.to&&t.to===e.from);
 let offset=e.curve??0;
@@ -99,7 +99,7 @@ function drag(el,onMove,nodeDrag=false,onTap=null){
   window.addEventListener('pointercancel',end);
  });
 }
-function add(){if(state.nodes.length>=9){alert('最多添加 9 位角色。');return;}snapshot();const i=state.nodes.length,a=-Math.PI/2+i*2*Math.PI/Math.max(3,i+1);const oldH=canvasH();const p={id:uid(),name:'角色 '+(i+1),x:500+260*Math.cos(a),y:oldH/2+(oldH/2-110)*Math.sin(a),image:''};state.nodes.push(p);const newH=canvasH();if(newH>oldH){for(const node of state.nodes)node.y=clamp(node.y*newH/oldH,65,newH-65);}if(state.nodes.length<=5)addMissingPairs();selectedNode=p.id;selectedEdge=null;commit();}
+function add(){if(state.nodes.length>=9){alert('最多添加 9 位角色。');return;}snapshot();const i=state.nodes.length,a=-Math.PI/2+i*2*Math.PI/Math.max(3,i+1);const oldH=canvasH();const p={id:uid(),name:'角色 '+(i+1),x:500+350*Math.cos(a),y:oldH/2+(oldH/2-110)*Math.sin(a),image:''};state.nodes.push(p);const newH=canvasH();if(newH>oldH){for(const node of state.nodes)node.y=clamp(node.y*newH/oldH,65,newH-65);}if(state.nodes.length<=5)addMissingPairs();selectedNode=p.id;selectedEdge=null;commit();}
 $('add').onclick=add;$('fillEdges').onclick=()=>{const missing=state.nodes.length*(state.nodes.length-1)-state.edges.length;if(missing<=0){alert('所有双向箭头都已经存在。');return;}snapshot();addMissingPairs();commit();};$('move').onclick=()=>{mode='move';pending=null;render();};$('connect').onclick=()=>{mode='connect';pending=null;render();};$('ring').onclick=()=>layout('ring');$('star').onclick=()=>layout('star');
 $('nodeName').oninput=()=>{const n=nodeBy(selectedNode);if(n){n.name=$('nodeName').value;persist();const el=[...$('nodes').children].find(x=>x.classList.contains('selected'));if(el){el.querySelector('.nm').textContent=n.name;if(!n.image)el.querySelector('.avatar').textContent=n.name.slice(0,1);}}};
 $('nodeName').onfocus=()=>snapshot();
