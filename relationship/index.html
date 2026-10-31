@@ -29,9 +29,13 @@ const start={x:a.x+ux*47+nx*side,y:a.y+uy*47+ny*side},end={x:b.x-ux*47+nx*side,y
 const ctrl={x:(start.x+end.x)/2+nx*offset*2,y:(start.y+end.y)/2+ny*offset*2};
 const mid={x:(start.x+2*ctrl.x+end.x)/4,y:(start.y+2*ctrl.y+end.y)/4};
 const tangent={x:end.x-ctrl.x,y:end.y-ctrl.y},ang=Math.atan2(tangent.y,tangent.x);
+// Keep the description parallel to its arrow and readable from left to right.
+let textAngle=Math.atan2(end.y-start.y,end.x-start.x);
+if(textAngle>Math.PI/2)textAngle-=Math.PI;
+if(textAngle< -Math.PI/2)textAngle+=Math.PI;
 const labelSide=offset>=0?1:-1;
-const label={x:mid.x+nx*labelSide*52,y:mid.y+ny*labelSide*52};
-return {start,end,ctrl,mid,label,ang,offset,nx,ny};}
+const label={x:mid.x+nx*labelSide*38,y:mid.y+ny*labelSide*38};
+return {start,end,ctrl,mid,label,ang,textAngle,offset,nx,ny};}
 function svgEl(tag,attrs){const el=document.createElementNS('http://www.w3.org/2000/svg',tag);Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));return el;}
 function render(){
 $('move').classList.toggle('active',mode==='move');$('connect').classList.toggle('active',mode==='connect');$('connect').textContent=pending?'选择终点角色…':'↗ 添加箭头';
@@ -45,7 +49,7 @@ for(const edge of state.edges){const g=geom(edge);if(!g)continue;const d='M '+g.
 const group=svgEl('g',{});const path=svgEl('path',{d,class:'path',stroke:edge.color||palette[0],'stroke-dasharray':edge.dash==='dash'?'7 6':'none'});group.append(path);
 const size=12,aa=g.ang,tip=g.end;const arrow=svgEl('path',{d:'M '+(tip.x-size*Math.cos(aa-.48))+' '+(tip.y-size*Math.sin(aa-.48))+' L '+tip.x+' '+tip.y+' L '+(tip.x-size*Math.cos(aa+.48))+' '+(tip.y-size*Math.sin(aa+.48)),stroke:edge.color||palette[0],'stroke-width':2.5,fill:'none','stroke-linejoin':'round'});group.append(arrow);
 const hit=svgEl('path',{d,class:'hit'});hit.style.pointerEvents='stroke';hit.addEventListener('click',()=>{selectedEdge=edge.id;selectedNode=null;render();});group.append(hit);svg.append(group);
-const label=document.createElement('textarea');label.className='note'+(selectedEdge===edge.id?' selected':'');label.placeholder='写感情…';label.value=edge.text||'';label.rows=1;label.style.left=((g.label.x+(edge.tx||0))/W*100)+'%';label.style.top=((g.label.y+(edge.ty||0))/H*100)+'%';label.style.height=Math.max(26,Math.min(110,26+(String(edge.text||'').split('\n').length-1)*17))+'px';
+const label=document.createElement('textarea');label.className='note'+(selectedEdge===edge.id?' selected':'');label.placeholder='写感情…';label.value=edge.text||'';label.rows=1;label.style.left=((g.label.x+(edge.tx||0))/W*100)+'%';label.style.top=((g.label.y+(edge.ty||0))/H*100)+'%';label.style.height=Math.max(26,Math.min(110,26+(String(edge.text||'').split('\n').length-1)*17))+'px';label.style.transform='translate(-50%,-50%) rotate('+g.textAngle+'rad)';
 label.addEventListener('focus',()=>{selectedEdge=edge.id;selectedNode=null;});label.addEventListener('input',()=>{edge.text=label.value;label.style.height='auto';label.style.height=Math.max(26,label.scrollHeight)+'px';persist();});notes.append(label);
 if(selectedEdge===edge.id){const h=document.createElement('div');h.className='handle';h.style.left=(g.ctrl.x/W*100)+'%';h.style.top=(g.ctrl.y/H*100)+'%';handles.append(h);drag(h,(p)=>{const gg=geom(edge);if(!gg)return;edge.curve=clamp(Math.round(((p.x-(gg.start.x+gg.end.x)/2)*gg.nx+(p.y-(gg.start.y+gg.end.y)/2)*gg.ny)/2),-220,220);render();});}
 }
@@ -101,7 +105,7 @@ $('closePreview').onclick=()=>$('preview').classList.add('hidden');
 function wrap(ctx,text,x,y,maxWidth,lineHeight=17){const lines=String(text||'').split('\n');let yy=y;ctx.textAlign='center';for(const line of lines){let segment='';for(const char of line){if(ctx.measureText(segment+char).width>maxWidth&&segment){ctx.fillText(segment,x,yy);yy+=lineHeight;segment=char;}else segment+=char;}ctx.fillText(segment,x,yy);yy+=lineHeight;} }
 $('png').onclick=async()=>{const btn=$('png');btn.disabled=true;btn.textContent='正在生成…';try{const scale=2,canvas=document.createElement('canvas');canvas.width=W*scale;canvas.height=H*scale;const ctx=canvas.getContext('2d');ctx.scale(scale,scale);ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
 for(const e of state.edges){const g=geom(e);if(!g)continue;ctx.strokeStyle=e.color||palette[0];ctx.lineWidth=2.5;ctx.setLineDash(e.dash==='dash'?[7,6]:[]);ctx.beginPath();ctx.moveTo(g.start.x,g.start.y);ctx.quadraticCurveTo(g.ctrl.x,g.ctrl.y,g.end.x,g.end.y);ctx.stroke();ctx.setLineDash([]);ctx.beginPath();ctx.moveTo(g.end.x-12*Math.cos(g.ang-.48),g.end.y-12*Math.sin(g.ang-.48));ctx.lineTo(g.end.x,g.end.y);ctx.lineTo(g.end.x-12*Math.cos(g.ang+.48),g.end.y-12*Math.sin(g.ang+.48));ctx.stroke();
-if(e.text){ctx.font='13px sans-serif';const lines=String(e.text).split('\n');const y=g.label.y+(e.ty||0);ctx.fillStyle='rgba(255,255,255,.94)';ctx.fillRect(g.label.x+(e.tx||0)-79,y-13,158,Math.max(24,lines.length*17+7));ctx.fillStyle='#383238';wrap(ctx,e.text,g.label.x+(e.tx||0),y,150);}}
+if(e.text){ctx.save();ctx.translate(g.label.x+(e.tx||0),g.label.y+(e.ty||0));ctx.rotate(g.textAngle);ctx.font='13px sans-serif';const lines=String(e.text).split('\n');const boxH=Math.max(26,lines.length*17+7);ctx.fillStyle='rgba(255,255,255,.94)';ctx.fillRect(-79,-boxH/2,158,boxH);ctx.fillStyle='#383238';wrap(ctx,e.text,0,-boxH/2+15,150);ctx.restore();}}
 for(const n of state.nodes){ctx.fillStyle='#f2eaf0';ctx.beginPath();ctx.arc(n.x,n.y-10,40,0,Math.PI*2);ctx.fill();if(n.image){const img=new Image();img.src=n.image;try{await img.decode();ctx.save();ctx.beginPath();ctx.arc(n.x,n.y-10,38,0,Math.PI*2);ctx.clip();const ratio=Math.max(76/img.naturalWidth,76/img.naturalHeight);const iw=img.naturalWidth*ratio,ih=img.naturalHeight*ratio;ctx.drawImage(img,n.x-iw/2,n.y-10-ih/2,iw,ih);ctx.restore();}catch(err){}}else{ctx.fillStyle='#665c63';ctx.font='25px sans-serif';ctx.textAlign='center';ctx.fillText((n.name||'?').slice(0,1),n.x,n.y-2);}ctx.strokeStyle='#cfc4cb';ctx.lineWidth=2;ctx.beginPath();ctx.arc(n.x,n.y-10,40,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#29272a';ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText(n.name||'',n.x,n.y+48,108);}
 ctx.fillStyle='rgba(80,80,80,.65)';ctx.textAlign='right';ctx.font='12px sans-serif';ctx.fillText('制表人：aizawa',W-18,22);
 const blob=await new Promise((ok,bad)=>canvas.toBlob(b=>b?ok(b):bad(Error('图片生成失败')),'image/png'));const ios=/iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);if(ios){const url=URL.createObjectURL(blob);$('previewImg').src=url;$('preview').classList.remove('hidden');}else download(blob,'CP-CB-关系图.png');
