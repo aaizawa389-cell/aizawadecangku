@@ -28,13 +28,18 @@ function addMissingPairs(){
  return count;
 }
 function layout(kind){snapshot();const ns=state.nodes,n=ns.length;if(!n)return;const H=canvasH(),cx=W/2,cy=H/2;if(kind==='star'){const central=selectedNode&&nodeBy(selectedNode)||ns[0];central.x=cx;central.y=cy;const others=ns.filter(x=>x!==central);if(n===3){others[0].x=cx-320;others[0].y=cy;others[1].x=cx+320;others[1].y=cy;}else others.forEach((p,i)=>{const a=-Math.PI/2+2*Math.PI*i/others.length;p.x=cx+310*Math.cos(a);p.y=cy+(H/2-110)*Math.sin(a);});}else ns.forEach((p,i)=>{const a=-Math.PI/2+2*Math.PI*i/n;p.x=cx+330*Math.cos(a);p.y=cy+(H/2-110)*Math.sin(a);});commit();}
-function geom(e){const a=nodeBy(e.from),b=nodeBy(e.to);if(!a||!b)return null;const dx=b.x-a.x,dy=b.y-a.y,len=Math.max(1,Math.hypot(dx,dy)),ux=dx/len,uy=dy/len,nx=-uy,ny=ux;
+function geom(e){const a=nodeBy(e.from),b=nodeBy(e.to);if(!a||!b)return null;const ax=a.x,ay=a.y-10,bx=b.x,by=b.y-10;const dx=bx-ax,dy=by-ay,len=Math.max(1,Math.hypot(dx,dy)),ux=dx/len,uy=dy/len,nx=-uy,ny=ux;
 const reverse=state.edges.find(t=>t.from===e.to&&t.to===e.from);
 let offset=e.curve??0;
 // Older saved projects used opposite signs for the two directions, which put both arcs on the same side.
 if(reverse&&offset*(reverse.curve??0)<0)offset=Math.abs(offset);
-const side=reverse?20:0;
-const start={x:a.x+ux*47+nx*side,y:a.y+uy*47+ny*side},end={x:b.x-ux*47+nx*side,y:b.y-uy*47+ny*side};
+// Anchor each arrow to the visible avatar circle, not the node's text/name box.
+ // Give reciprocal arrows separate lanes and stop the tips just outside the rim.
+ const side=reverse?14:0;
+ const radius=40,clearance=9;
+ const inset=Math.sqrt(radius*radius-side*side)+clearance;
+ const start={x:ax+ux*inset+nx*side,y:ay+uy*inset+ny*side};
+ const end={x:bx-ux*inset+nx*side,y:by-uy*inset+ny*side};
 const ctrl={x:(start.x+end.x)/2+nx*offset*2,y:(start.y+end.y)/2+ny*offset*2};
 const mid={x:(start.x+2*ctrl.x+end.x)/4,y:(start.y+2*ctrl.y+end.y)/4};
 const tangent={x:end.x-ctrl.x,y:end.y-ctrl.y},ang=Math.atan2(tangent.y,tangent.x);
